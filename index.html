@@ -289,6 +289,7 @@
           <div class="phase" id="phase">Bereit für den Start ✨</div>
           <div class="clock" id="clock">00:00</div>
           <div class="progress"><div class="bar" id="bar"></div></div>
+          <div class="chip" id="progressInfo">Fortschritt 0%</div>
           <div class="meta">
             <span class="chip" id="setInfo">Satz 1/1</span>
             <span class="chip" id="repInfo">Wdh 0/0</span>
@@ -313,6 +314,7 @@
         setInfo: document.getElementById("setInfo"),
         repInfo: document.getElementById("repInfo"),
         bar: document.getElementById("bar"),
+        progressInfo: document.getElementById("progressInfo"),
         status: document.getElementById("status"),
         joint: document.getElementById("joint")
       };
@@ -406,8 +408,16 @@
         refs.setInfo.textContent = `Satz ${Math.min(state.set, config.sets)}/${config.sets}`;
         refs.repInfo.textContent = `Wdh ${Math.min(state.rep, config.reps)}/${config.reps}`;
 
-        const progress = (state.completedPhases / Math.max(1, state.totalPhases)) * 100;
-        refs.bar.style.width = `${Math.min(progress, 100)}%`;
+        const totalPhases = Math.max(1, state.totalPhases);
+        const phaseCompletion = Math.min(
+          1,
+          Math.max(0, (state.phaseDuration - state.phaseRemaining) / Math.max(1, state.phaseDuration))
+        );
+        const progress = ((state.completedPhases + (state.phase === "done" ? 0 : phaseCompletion)) / totalPhases) * 100;
+        const progressPercent = Math.min(100, Math.max(0, Math.round(progress)));
+
+        refs.bar.style.width = `${progressPercent}%`;
+        refs.progressInfo.textContent = `Fortschritt ${progressPercent}%`;
 
         refs.joint.classList.toggle("resting", state.phase !== "active");
       }
@@ -501,6 +511,7 @@
         state.phase = "done";
         state.phaseRemaining = 0;
         refs.bar.style.width = "100%";
+        refs.progressInfo.textContent = "Fortschritt 100%";
         refs.status.textContent = "Abgeschlossen! Knie glücklich, du glücklich. Mega! 🦵🥳";
       }
 

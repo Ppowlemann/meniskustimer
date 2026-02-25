@@ -23,6 +23,8 @@ Zusätzlich gibt es akustische Signale:
 - wenn eine Aktivphase endet
 - wenn die nächste Aktivphase beginnt
 
+Neu: Ein Fortschrittsbalken mit Prozentanzeige zeigt dir jederzeit, wie viel der gesamten Übung bereits geschafft ist.
+
 ## Lokal starten
 
 Da die App komplett statisch ist (nur `index.html`), hast du mehrere einfache Optionen:
