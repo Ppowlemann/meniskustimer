@@ -239,15 +239,15 @@
           <div class="grid">
             <label>
               Wiederholungen pro Satz
-              <input id="reps" type="number" min="1" value="8" />
+              <input id="reps" type="number" min="1" value="10" />
             </label>
             <label>
               Aktivphase (Sek.)
-              <input id="activeSec" type="number" min="1" value="30" />
+              <input id="activeSec" type="number" min="1" value="8" />
             </label>
             <label>
               Ruhe zwischen Wiederholungen (Sek.)
-              <input id="restRepSec" type="number" min="1" value="20" />
+              <input id="restRepSec" type="number" min="1" value="10" />
             </label>
             <label>
               Anzahl Sätze
@@ -255,7 +255,7 @@
             </label>
             <label>
               Satzpause (Sek.)
-              <input id="restSetSec" type="number" min="1" value="90" />
+              <input id="restSetSec" type="number" min="1" value="60" />
             </label>
           </div>
           <div class="buttons">
@@ -320,6 +320,7 @@
       let timer = null;
       let config = null;
       let state = null;
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
       const funnyMessages = [
         "Stark! Dein Knie bekommt VIP-Service. 😎",
@@ -336,12 +337,41 @@
 
       function readConfig() {
         return {
-          reps: clampInt(refs.reps.value, 8),
-          activeSec: clampInt(refs.activeSec.value, 30),
-          restRepSec: clampInt(refs.restRepSec.value, 20),
+          reps: clampInt(refs.reps.value, 10),
+          activeSec: clampInt(refs.activeSec.value, 8),
+          restRepSec: clampInt(refs.restRepSec.value, 10),
           sets: clampInt(refs.sets.value, 3),
-          restSetSec: clampInt(refs.restSetSec.value, 90)
+          restSetSec: clampInt(refs.restSetSec.value, 60)
         };
+      }
+
+      function playTone(type) {
+        if (audioContext.state === "suspended") {
+          audioContext.resume();
+        }
+
+        const now = audioContext.currentTime;
+        const oscillator = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+
+        oscillator.type = "sine";
+
+        if (type === "activeStart") {
+          oscillator.frequency.setValueAtTime(740, now);
+          oscillator.frequency.exponentialRampToValueAtTime(880, now + 0.16);
+        } else {
+          oscillator.frequency.setValueAtTime(620, now);
+          oscillator.frequency.exponentialRampToValueAtTime(420, now + 0.22);
+        }
+
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.exponentialRampToValueAtTime(0.16, now + 0.015);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.24);
+
+        oscillator.connect(gain);
+        gain.connect(audioContext.destination);
+        oscillator.start(now);
+        oscillator.stop(now + 0.26);
       }
 
       function fmt(sec) {
@@ -386,6 +416,7 @@
         state.completedPhases += 1;
 
         if (state.phase === "active") {
+          playTone("activeEnd");
           if (state.rep < config.reps) {
             state.phase = "restRep";
             state.phaseRemaining = config.restRepSec;
@@ -404,12 +435,14 @@
           state.phase = "active";
           state.phaseRemaining = config.activeSec;
           state.phaseDuration = config.activeSec;
+          playTone("activeStart");
         } else if (state.phase === "restSet") {
           state.set += 1;
           state.rep = 1;
           state.phase = "active";
           state.phaseRemaining = config.activeSec;
           state.phaseDuration = config.activeSec;
+          playTone("activeStart");
           refs.status.textContent = `Satz ${state.set}: Du bist zurück im Ring! 🥊`;
         }
       }

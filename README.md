@@ -11,6 +11,18 @@ Du kannst einstellen:
 
 Dazu gibt's ein animiertes Knie-Visual, freundliche Motivations-Sprüche und einen klaren Timer-Ablauf für regelmässiges Training nach der Meniskus-OP.
 
+## Standardwerte (direkt beim Start)
+
+- 3 Sätze
+- 10 Wiederholungen pro Satz
+- 8 Sekunden Aktivphase
+- 10 Sekunden Ruhe zwischen Wiederholungen
+- 60 Sekunden Satzpause
+
+Zusätzlich gibt es akustische Signale:
+- wenn eine Aktivphase endet
+- wenn die nächste Aktivphase beginnt
+
 ## Lokal starten
 
 Da die App komplett statisch ist (nur `index.html`), hast du mehrere einfache Optionen:
